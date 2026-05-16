@@ -1,0 +1,202 @@
+{% extends "app_gabah/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+<div style="max-width:640px;">
+    <div class="sc">
+
+        <!-- Form Header -->
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #f1f5f9;">
+            <div class="ib ib40 ib-v"><i class="fas fa-hand-holding-dollar"></i></div>
+            <div>
+                <h3 style="font-size:17px; font-weight:700; color:#0f172a;">{{ title }}</h3>
+                <p style="font-size:12px; color:#94a3b8;">Catat simpanan atau pinjaman anggota</p>
+            </div>
+        </div>
+
+        <form method="post" id="spForm">
+            {% csrf_token %}
+            <div style="display:flex; flex-direction:column; gap:18px;">
+
+                <!-- Anggota -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_anggota">
+                        Nama Anggota <span style="color:#dc2626;">*</span>
+                    </label>
+                    {{ form.anggota }}
+                    {% if form.anggota.errors %}
+                    <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                        {% for err in form.anggota.errors %}
+                        <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Tipe & Status -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_tipe">
+                            Tipe Transaksi <span style="color:#dc2626;">*</span>
+                        </label>
+                        {{ form.tipe }}
+                        {% if form.tipe.errors %}
+                        <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                            {% for err in form.tipe.errors %}
+                            <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_status">
+                            Status <span style="color:#dc2626;">*</span>
+                        </label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                        <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                            {% for err in form.status.errors %}
+                            <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Jumlah & Bunga -->
+                <div style="display:grid; grid-template-columns:2fr 1fr; gap:16px;">
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_jumlah_rp">
+                            Jumlah (Rp) <span style="color:#dc2626;">*</span>
+                        </label>
+                        <div style="position:relative;">
+                            <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#64748b; font-size:14px; font-weight:600;">Rp</span>
+                            {{ form.jumlah_rp }}
+                        </div>
+                        {% if form.jumlah_rp.errors %}
+                        <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                            {% for err in form.jumlah_rp.errors %}
+                            <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_bunga_persen">
+                            Bunga (%)
+                        </label>
+                        {{ form.bunga_persen }}
+                        <p style="font-size:11px; color:#94a3b8; margin-top:4px;">Isi 0 jika tanpa bunga</p>
+                        {% if form.bunga_persen.errors %}
+                        <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                            {% for err in form.bunga_persen.errors %}
+                            <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div id="bunganInfo" style="background:#f5f3ff; border:1px solid #ddd6fe; border-radius:10px; padding:12px 16px; display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-calculator" style="color:#7c3aed; font-size:16px; flex-shrink:0;"></i>
+                    <div style="font-size:12px; color:#5b21b6;">
+                        Total dengan bunga: <strong id="previewTotal">Rp 0</strong>
+                    </div>
+                </div>
+
+                <!-- Tanggal & Jatuh Tempo -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_tanggal">
+                            Tanggal <span style="color:#dc2626;">*</span>
+                        </label>
+                        {{ form.tanggal }}
+                        {% if form.tanggal.errors %}
+                        <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                            {% for err in form.tanggal.errors %}
+                            <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_jatuh_tempo">
+                            Jatuh Tempo
+                        </label>
+                        {{ form.jatuh_tempo }}
+                        {% if form.jatuh_tempo.errors %}
+                        <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                            {% for err in form.jatuh_tempo.errors %}
+                            <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Keterangan -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_keterangan">
+                        Keterangan
+                    </label>
+                    {{ form.keterangan }}
+                    {% if form.keterangan.errors %}
+                    <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                        {% for err in form.keterangan.errors %}
+                        <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex; gap:10px; margin-top:28px; padding-top:20px; border-top:1px solid #f1f5f9;">
+                <button type="submit" class="bp" style="flex:1; justify-content:center;">
+                    <i class="fas fa-save"></i> Simpan Data
+                </button>
+                <a href="{% url 'sp_list' %}" class="bs" style="justify-content:center;">
+                    <i class="fas fa-times"></i> Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Style fix -->
+<style>
+    #id_jumlah_rp { padding-left: 40px !important; }
+</style>
+
+<!-- Auto-calculate bunga preview -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var jrp = document.getElementById('id_jumlah_rp');
+    var bp = document.getElementById('id_bunga_persen');
+
+    function calc() {
+        var rp = parseFloat(jrp.value) || 0;
+        var b = parseFloat(bp.value) || 0;
+        var bungaRp = rp * b / 100;
+        var total = rp + bungaRp;
+        var el = document.getElementById('previewTotal');
+        var box = document.getElementById('bunganInfo');
+        if (total > 0) {
+            el.textContent = 'Rp ' + total.toLocaleString('id-ID', {minimumFractionDigits:0, maximumFractionDigits:0});
+            box.style.display = 'flex';
+        } else {
+            el.textContent = 'Rp 0';
+        }
+    }
+
+    if (jrp) jrp.addEventListener('input', calc);
+    if (bp) bp.addEventListener('input', calc);
+    calc();
+});
+</script>
+
+{% endblock %}

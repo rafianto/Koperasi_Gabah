@@ -1,0 +1,97 @@
+{% extends "app_gabah/base.html" %}
+{% block title %}Iuran Panen Gabah{% endblock %}
+{% block page_title %}Iuran Panen Gabah{% endblock %}
+
+{% block content %}
+
+<!-- Toolbar -->
+<div class="fb mb6">
+    <a href="{% url 'iuran_create' %}" class="bp"><i class="fas fa-plus"></i> Tambah Iuran</a>
+    <form method="get" class="fg" style="flex-wrap:wrap;">
+        <select name="af" class="fi" style="width:180px;">
+            <option value="">Semua Anggota</option>
+            {% for a in anggota_list %}
+            <option value="{{ a.pk }}" {% if af == a.pk|stringformat:"s" %}selected{% endif %}>{{ a.nama }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="pf" value="{{ pf }}" placeholder="Periode..." class="fi" style="width:140px;">
+        <button type="submit" class="bs"><i class="fas fa-filter"></i> Filter</button>
+    </form>
+</div>
+
+<!-- Summary Cards -->
+<div class="g2 mb6">
+    <div class="sc bl4 bla">
+        <div class="fb">
+            <div>
+                <div class="lbl">Total Iuran</div>
+                <div class="val" style="color:#d97706;">{{ tkg|floatformat:1 }} <small style="font-size:14px; font-weight:400; color:#94a3b8;">kg</small></div>
+            </div>
+            <div class="ib ib48 ib-a"><i class="fas fa-boxes-stacked"></i></div>
+        </div>
+    </div>
+    <div class="sc bl4 ble">
+        <div class="fb">
+            <div>
+                <div class="lbl">Total Nilai</div>
+                <div class="val" style="color:#059669;">Rp {{ trp|floatformat:0 }}</div>
+            </div>
+            <div class="ib ib48 ib-e"><i class="fas fa-coins"></i></div>
+        </div>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="tc ox">
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Tanggal</th>
+                <th>Anggota</th>
+                <th>Periode</th>
+                <th style="text-align:right;">Jumlah (kg)</th>
+                <th style="text-align:right;">Harga / 100kg</th>
+                <th style="text-align:right;">Nilai (Rp)</th>
+                <th>Keterangan</th>
+                <th style="text-align:center;">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in object_list %}
+            <tr>
+                <td style="color:#94a3b8; font-weight:600;">{{ forloop.counter }}</td>
+                <td style="font-weight:600; color:#1e293b;">{{ obj.tanggal|date:"d M Y" }}</td>
+                <td>
+                    <a href="{% url 'anggota_detail' obj.anggota.pk %}" style="color:#059669; font-weight:600; text-decoration:none;">
+                        {{ obj.anggota.nama }}
+                    </a>
+                </td>
+                <td><span class="badge bg-sl">{{ obj.periode }}</span></td>
+                <td style="text-align:right; font-weight:700; color:#d97706; font-size:14px;">{{ obj.jumlah_kg|floatformat:1 }}</td>
+                <td style="text-align:right;">Rp {{ obj.harga_per_100kg|floatformat:0 }}</td>
+                <td style="text-align:right; font-weight:700; color:#0f172a;">Rp {{ obj.nilai_rp|floatformat:0 }}</td>
+                <td style="max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#64748b;">
+                    {{ obj.keterangan|default:"-" }}
+                </td>
+                <td>
+                    <div class="fgc">
+                        <a href="{% url 'iuran_update' obj.pk %}" class="ab ab-e" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="{% url 'iuran_delete' obj.pk %}" class="ab ab-d" title="Hapus"><i class="fas fa-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="text-align:center; padding:48px 16px; color:#94a3b8;">
+                    <div style="margin-bottom:12px;"><i class="fas fa-boxes-stacked" style="font-size:36px; color:#e2e8f0;"></i></div>
+                    <div style="font-size:15px; font-weight:600; color:#64748b; margin-bottom:4px;">Belum Ada Data Iuran</div>
+                    <div style="font-size:13px;">Klik tombol "Tambah Iuran" untuk mencatat iuran panen baru</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

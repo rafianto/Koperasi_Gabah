@@ -1,0 +1,93 @@
+{% extends "app_gabah/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:640px;">
+    <div class="sc">
+
+        <!-- Form Header -->
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #f1f5f9;">
+            <div class="ib ib40 ib-e"><i class="fas fa-tags"></i></div>
+            <div>
+                <h3 style="font-size:17px; font-weight:700; color:#0f172a;">{{ title }}</h3>
+                <p style="font-size:12px; color:#94a3b8;">Masukkan harga gabah yang berlaku</p>
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display:flex; flex-direction:column; gap:18px;">
+
+                <!-- Tanggal -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_tanggal">
+                        Tanggal Berlaku <span style="color:#dc2626;">*</span>
+                    </label>
+                    {{ form.tanggal }}
+                    {% if form.tanggal.errors %}
+                    <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                        {% for err in form.tanggal.errors %}
+                        <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Harga -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_harga_per_100kg">
+                        Harga per 100 kg (Rp) <span style="color:#dc2626;">*</span>
+                    </label>
+                    <div style="position:relative;">
+                        <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#64748b; font-size:14px; font-weight:600;">Rp</span>
+                        {{ form.harga_per_100kg }}
+                    </div>
+                    <p style="font-size:11px; color:#94a3b8; margin-top:4px;"><i class="fas fa-info-circle" style="margin-right:4px;"></i>Masukkan harga dalam Rupiah untuk setiap 100 kg gabah</p>
+                    {% if form.harga_per_100kg.errors %}
+                    <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                        {% for err in form.harga_per_100kg.errors %}
+                        <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Catatan -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_catatan">
+                        Catatan Khusus
+                    </label>
+                    {{ form.catatan }}
+                    <p style="font-size:11px; color:#94a3b8; margin-top:4px;"><i class="fas fa-info-circle" style="margin-right:4px;"></i>Catatan khusus terkait harga gabah (opsional)</p>
+                    {% if form.catatan.errors %}
+                    <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                        {% for err in form.catatan.errors %}
+                        <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex; gap:10px; margin-top:28px; padding-top:20px; border-top:1px solid #f1f5f9;">
+                <button type="submit" class="bp" style="flex:1; justify-content:center;">
+                    <i class="fas fa-save"></i> Simpan Harga
+                </button>
+                <a href="{% url 'harga_list' %}" class="bs" style="justify-content:center;">
+                    <i class="fas fa-times"></i> Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Style fix for harga input prefix -->
+<style>
+    #id_harga_per_100kg { padding-left: 40px !important; }
+    #id_tanggal { width: 100%; }
+</style>
+
+{% endblock %}
