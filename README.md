@@ -16,3 +16,12 @@ system pengelolaan koperasi Gabah
 
 <img width="1851" height="858" alt="image" src="https://github.com/user-attachments/assets/ed6159f0-7a87-4942-a539-494a478de3b8" />
 
+dashboard : akumulasi kg stok gabah
+
+<img width="1836" height="772" alt="image" src="https://github.com/user-attachments/assets/3c9a06ab-380e-4ad5-b780-1282443d9149" />
+
+jika total stok gabah tidak cukup di gudang :
+
+<img width="896" height="578" alt="image" src="https://github.com/user-attachments/assets/6ee48d26-7386-4fd6-a8b8-a4d1ecfab9e4" />
+
+
