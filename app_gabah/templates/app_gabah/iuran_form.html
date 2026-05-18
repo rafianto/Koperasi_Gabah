@@ -1,0 +1,181 @@
+{% extends "app_gabah/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:640px;">
+    <div class="sc">
+
+        <!-- Form Header -->
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #f1f5f9;">
+            <div class="ib ib40 ib-a"><i class="fas fa-boxes-stacked"></i></div>
+            <div>
+                <h3 style="font-size:17px; font-weight:700; color:#0f172a;">{{ title }}</h3>
+                <p style="font-size:12px; color:#94a3b8;">Catat iuran panen gabah anggota</p>
+            </div>
+        </div>
+
+        <!-- Prasyarat Warning -->
+        {% if not form.fields.anggota.queryset.exists %}
+        <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:14px 16px; margin-bottom:20px; display:flex; align-items:flex-start; gap:10px;">
+            <i class="fas fa-exclamation-triangle" style="color:#dc2626; font-size:16px; margin-top:1px; flex-shrink:0;"></i>
+            <div>
+                <div style="font-size:13px; font-weight:600; color:#991b1b; margin-bottom:4px;">Belum Ada Data Anggota</div>
+                <div style="font-size:12px; color:#b91c1c;">
+                    Anda harus menambahkan data anggota terlebih dahulu sebelum mencatat iuran.
+                    <a href="{% url 'anggota_create' %}" style="color:#dc2626; font-weight:600; text-decoration:underline;">Tambah Anggota →</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="post" id="iuranForm">
+            {% csrf_token %}
+            <div style="display:flex; flex-direction:column; gap:18px;">
+
+                <!-- Anggota -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_anggota">
+                        Nama Anggota <span style="color:#dc2626;">*</span>
+                    </label>
+                    {{ form.anggota }}
+                    {% if form.anggota.errors %}
+                    <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                        {% for err in form.anggota.errors %}
+                        <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Periode -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_periode">
+                        Periode <span style="color:#dc2626;">*</span>
+                    </label>
+                    {{ form.periode }}
+                    <p style="font-size:11px; color:#94a3b8; margin-top:4px;"><i class="fas fa-info-circle" style="margin-right:4px;"></i>Contoh: Januari 2024, Q1 2024</p>
+                    {% if form.periode.errors %}
+                    <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                        {% for err in form.periode.errors %}
+                        <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Tanggal -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_tanggal">
+                        Tanggal Iuran <span style="color:#dc2626;">*</span>
+                    </label>
+                    {{ form.tanggal }}
+                    {% if form.tanggal.errors %}
+                    <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                        {% for err in form.tanggal.errors %}
+                        <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Jumlah & Harga (Side by side) -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_jumlah_kg">
+                            Jumlah (kg) <span style="color:#dc2626;">*</span>
+                        </label>
+                        {{ form.jumlah_kg }}
+                        {% if form.jumlah_kg.errors %}
+                        <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                            {% for err in form.jumlah_kg.errors %}
+                            <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_harga_per_100kg">
+                            Harga / 100kg (Rp) <span style="color:#dc2626;">*</span>
+                        </label>
+                        {{ form.harga_per_100kg }}
+                        {% if form.harga_per_100kg.errors %}
+                        <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                            {% for err in form.harga_per_100kg.errors %}
+                            <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Info Box: Nilai Rp Otomatis -->
+                <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:14px 16px; display:flex; align-items:center; gap:12px;">
+                    <i class="fas fa-calculator" style="color:#059669; font-size:18px; flex-shrink:0;"></i>
+                    <div style="flex:1;">
+                        <div style="font-size:12px; color:#065f46; margin-bottom:4px;">
+                            <strong>Nilai Rp dihitung otomatis:</strong> (Jumlah kg ÷ 100) × Harga/100kg
+                        </div>
+                        <div style="font-size:16px; font-weight:800; color:#047857;" id="previewNilai">
+                            Rp 0
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keterangan -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="id_keterangan">
+                        Keterangan
+                    </label>
+                    {{ form.keterangan }}
+                    {% if form.keterangan.errors %}
+                    <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                        {% for err in form.keterangan.errors %}
+                        <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex; gap:10px; margin-top:28px; padding-top:20px; border-top:1px solid #f1f5f9;">
+                <button type="submit" class="bp" style="flex:1; justify-content:center;">
+                    <i class="fas fa-save"></i> Simpan Data
+                </button>
+                <a href="{% url 'iuran_list' %}" class="bs" style="justify-content:center;">
+                    <i class="fas fa-times"></i> Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Auto-calculate preview -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var jkg = document.getElementById('id_jumlah_kg');
+    var hg = document.getElementById('id_harga_per_100kg');
+
+    function calc() {
+        var kg = parseFloat(jkg.value) || 0;
+        var h = parseFloat(hg.value) || 0;
+        var nilai = (kg / 100) * h;
+        var el = document.getElementById('previewNilai');
+        if (nilai > 0) {
+            el.textContent = 'Rp ' + nilai.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+            el.style.color = '#047857';
+        } else {
+            el.textContent = 'Rp 0';
+            el.style.color = '#94a3b8';
+        }
+    }
+
+    if (jkg) jkg.addEventListener('input', calc);
+    if (hg) hg.addEventListener('input', calc);
+    calc();
+});
+</script>
+
+{% endblock %}

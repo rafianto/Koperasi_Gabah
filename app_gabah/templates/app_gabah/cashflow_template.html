@@ -1,0 +1,99 @@
+{% extends 'app_gabah/base.html' %}
+{% load humanize %}
+
+{% block title %}Laporan Arus Kas{% endblock %}
+{% block page_title %}Laporan Arus Kas (Cashflow){% endblock %}
+
+{% block content %}
+<div class="fb mb6">
+    <div>
+        <h3 style="font-size: 20px; font-weight: 800; color: #0f172a;">Laporan Arus Kas</h3>
+        <p style="font-size: 13px; color: #64748b;">Periode: {{ periode_mulai|date:"d M Y" }} s/d {{ periode_selesai|date:"d M Y" }}</p>
+    </div>
+</div>
+
+<!-- Filter Tanggal -->
+<div class="sc mb6">
+    <form method="GET" class="fg" style="flex-wrap: wrap;">
+        <div>
+            <label class="lbl">Tanggal Mulai</label>
+            <input type="date" class="fi" name="start_date" value="{{ start_date }}">
+        </div>
+        <div>
+            <label class="lbl">Tanggal Selesai</label>
+            <input type="date" class="fi" name="end_date" value="{{ end_date }}">
+        </div>
+        <div style="align-self: flex-end;">
+            <button type="submit" class="bp"><i class="fas fa-search"></i> Tampilkan</button>
+        </div>
+    </form>
+</div>
+
+<!-- Summary Cards -->
+<div class="g3 mb6">
+    <div class="sc bl4 ble">
+        <div class="fg">
+            <div class="ib ib40 ib-e"><i class="fas fa-arrow-down"></i></div>
+            <div>
+                <div class="lbl">Total Pemasukan</div>
+                <div class="val" style="color: #059669;">Rp {{ pemasukan.total_pemasukan|floatformat:0|intcomma }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="sc bl4 blr">
+        <div class="fg">
+            <div class="ib ib40 ib-r"><i class="fas fa-arrow-up"></i></div>
+            <div>
+                <div class="lbl">Total Pengeluaran</div>
+                <div class="val" style="color: #dc2626;">Rp {{ pengeluaran.total_pengeluaran|floatformat:0|intcomma }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="sc bl4 blb">
+        <div class="fg">
+            <div class="ib ib40 ib-b"><i class="fas fa-scale-balanced"></i></div>
+            <div>
+                <div class="lbl">Saldo Bersih</div>
+                <div class="val" style="color: #2563eb;">Rp {{ saldo_bersih|floatformat:0|intcomma }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Tables -->
+<div class="g2">
+    <!-- Tabel Pemasukan -->
+    <div class="sc">
+        <h4 style="font-weight: 700; margin-bottom: 12px; color: #059669;"><i class="fas fa-arrow-down"></i> Rincian Pemasukan</h4>
+        <div class="ox">
+            <table class="tc" style="width:100%;">
+                <tr><td>Iuran Panen Gabah</td><td class="tr fw6">Rp {{ pemasukan.iuran_panen|floatformat:0|intcomma }}</td></tr>
+                <tr><td>Penjualan Gabah</td><td class="tr fw6">Rp {{ pemasukan.penjualan_gabah|floatformat:0|intcomma }}</td></tr>
+                <tr><td>Simpanan Anggota Masuk</td><td class="tr fw6">Rp {{ pemasukan.simpanan_anggota|floatformat:0|intcomma }}</td></tr>
+                <tr><td>Bunga Pinjaman</td><td class="tr fw6">Rp {{ pemasukan.bunga_pinjaman|floatformat:0|intcomma }}</td></tr>
+                <tr><td>Kas Masuk Lainnya</td><td class="tr fw6">Rp {{ pemasukan.kas_masuk_lainnya|floatformat:0|intcomma }}</td></tr>
+                <tr style="background:#ecfdf5;">
+                    <td class="fw7" style="color:#047857;">TOTAL PEMASUKAN</td>
+                    <td class="tr fw7" style="color:#047857;">Rp {{ pemasukan.total_pemasukan|floatformat:0|intcomma }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tabel Pengeluaran -->
+    <div class="sc">
+        <h4 style="font-weight: 700; margin-bottom: 12px; color: #dc2626;"><i class="fas fa-arrow-up"></i> Rincian Pengeluaran</h4>
+        <div class="ox">
+            <table class="tc" style="width:100%;">
+                <tr><td>Pinjaman Anggota Keluar</td><td class="tr fw6">Rp {{ pengeluaran.pinjaman_anggota|floatformat:0|intcomma }}</td></tr>
+                <tr><td>Pengeluaran Operasional</td><td class="tr fw6">Rp {{ pengeluaran.pengeluaran_operasional|floatformat:0|intcomma }}</td></tr>
+                <tr><td>Kas Keluar Lainnya</td><td class="tr fw6">Rp {{ pengeluaran.kas_keluar_lainnya|floatformat:0|intcomma }}</td></tr>
+                <tr style="background:#fef2f2;">
+                    <td class="fw7" style="color:#991b1b;">TOTAL PENGELUARAN</td>
+                    <td class="tr fw7" style="color:#991b1b;">Rp {{ pengeluaran.total_pengeluaran|floatformat:0|intcomma }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

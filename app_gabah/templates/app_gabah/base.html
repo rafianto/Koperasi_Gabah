@@ -1,0 +1,242 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Koperasi Gabah{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: #f1f5f9; color: #334155; min-height: 100vh; line-height: 1.5; }
+        a { text-decoration: none; color: inherit; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed; top: 0; left: 0; height: 100vh; width: 272px;
+            background: #fff; border-right: 1px solid #e2e8f0;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.04);
+            z-index: 50; display: flex; flex-direction: column;
+            transform: translateX(-100%); transition: transform 0.3s ease;
+        }
+        .sidebar.open { transform: translateX(0); }
+        @media(min-width:1024px) { .sidebar { transform: translateX(0); } .main-area { margin-left: 272px; } }
+
+        .sb-logo { padding: 20px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; }
+        .sb-logo-icon { width: 42px; height: 42px; background: linear-gradient(135deg,#10b981,#047857); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(5,150,105,0.25); flex-shrink: 0; }
+        .sb-logo-icon i { color: #fff; font-size: 18px; }
+        .sb-logo h1 { color: #0f172a; font-weight: 800; font-size: 17px; line-height: 1.2; }
+        .sb-logo p { color: #94a3b8; font-size: 12px; font-weight: 500; margin-top: 2px; }
+
+        .sb-nav { flex: 1; overflow-y: auto; padding: 4px 0 16px; }
+        .sb-nav::-webkit-scrollbar { width: 4px; }
+        .sb-nav::-webkit-scrollbar-track { background: transparent; }
+        .sb-nav::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+
+        .sb-section { padding: 18px 20px 8px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; }
+        .sb-link { display: flex; align-items: center; gap: 12px; margin: 2px 10px; padding: 10px 14px; border-radius: 10px; font-size: 13.5px; font-weight: 500; color: #475569; transition: all 0.15s; border-left: 3px solid transparent; }
+        .sb-link:hover { background: #ecfdf5; color: #047857; }
+        .sb-link:hover i { color: #059669; }
+        .sb-link.act { background: #ecfdf5; color: #047857; font-weight: 600; border-left-color: #059669; }
+        .sb-link.act i { color: #059669; }
+        .sb-link i { width: 20px; text-align: center; font-size: 15px; color: #94a3b8; transition: color 0.15s; }
+
+        .sb-widget { padding: 16px; border-top: 1px solid #f1f5f9; }
+        .sb-widget-card { background: linear-gradient(135deg,#ecfdf5,#d1fae5); border: 1px solid #a7f3d0; border-radius: 12px; padding: 14px 16px; }
+        .sw-label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .sw-icon { width: 22px; height: 22px; background: #a7f3d0; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        .sw-icon i { font-size: 10px; color: #047857; }
+        .sw-label span { font-size: 10.5px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 0.05em; }
+        .sw-val { font-size: 20px; font-weight: 800; color: #065f46; padding-left: 30px; }
+        .sw-val small { font-size: 13px; font-weight: 400; color: #059669; }
+
+        /* ===== OVERLAY ===== */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.25); backdrop-filter: blur(2px); z-index: 40; display: none; }
+        .overlay.on { display: block; }
+
+        /* ===== TOPBAR ===== */
+        .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 30; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .menu-btn { background: none; border: none; cursor: pointer; color: #64748b; font-size: 18px; padding: 6px 8px; border-radius: 8px; display: none; }
+        .menu-btn:hover { background: #f1f5f9; }
+        @media(max-width:1023px) { .menu-btn { display: block; } }
+        .topbar-left h2 { font-size: 18px; font-weight: 800; color: #0f172a; }
+        .topbar-right { display: flex; align-items: center; gap: 14px; }
+        .user-badge { display: none; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 5px 12px 5px 6px; border-radius: 50px; }
+        .user-badge .av { width: 28px; height: 28px; background: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .user-badge .av i { color: #fff; font-size: 11px; }
+        .user-badge span { font-size: 13px; font-weight: 600; color: #475569; }
+        @media(min-width:640px) { .user-badge { display: flex; } }
+        .logout-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #64748b; padding: 6px 10px; border-radius: 8px; transition: all 0.15s; }
+        .logout-btn:hover { background: #fef2f2; color: #dc2626; }
+        .logout-btn span { display: none; }
+        @media(min-width:640px) { .logout-btn span { display: inline; } }
+
+        /* ===== TOAST ===== */
+        .toast { animation: tIn 0.3s ease-out; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-size: 13px; font-weight: 500; }
+        @keyframes tIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+        .t-ok { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; } .t-ok i { color:#059669; }
+        .t-er { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; } .t-er i { color:#dc2626; }
+        .t-wn { background:#fffbeb; color:#92400e; border:1px solid #fde68a; } .t-wn i { color:#d97706; }
+        .t-in { background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; } .t-in i { color:#2563eb; }
+        .toast .tx { margin-left:auto; background:none; border:none; cursor:pointer; color:inherit; opacity:0.4; font-size:12px; padding:2px 4px; }
+        .toast .tx:hover { opacity:0.8; }
+
+        .content { padding: 20px 24px; }
+
+        /* ===== FORM ===== */
+        .fi { width:100%; padding:10px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; color:#1e293b; outline:none; transition:all 0.15s; background:#fff; font-family:inherit; }
+        .fi:focus { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,0.12); }
+        .fi::placeholder { color:#9ca3af; }
+        select.fi { appearance:auto; }
+        textarea.fi { resize:vertical; min-height:60px; }
+
+        /* ===== BUTTONS ===== */
+        .bp { display:inline-flex; align-items:center; gap:8px; background:#059669; color:#fff; padding:10px 20px; border-radius:8px; font-size:13px; font-weight:600; border:none; cursor:pointer; box-shadow:0 2px 6px rgba(5,150,105,0.25); transition:all 0.15s; text-decoration:none; font-family:inherit; }
+        .bp:hover { background:#047857; }
+        .bd { display:inline-flex; align-items:center; gap:6px; background:#dc2626; color:#fff; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; border:none; cursor:pointer; transition:all 0.15s; text-decoration:none; font-family:inherit; }
+        .bd:hover { background:#b91c1c; }
+        .bs { display:inline-flex; align-items:center; gap:6px; background:#fff; color:#475569; padding:8px 16px; border-radius:8px; font-size:13px; font-weight:600; border:1px solid #d1d5db; cursor:pointer; transition:all 0.15s; text-decoration:none; font-family:inherit; }
+        .bs:hover { background:#f8fafc; border-color:#94a3b8; }
+
+        /* ===== CARD ===== */
+        .sc { background:#fff; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.03); padding:20px; }
+
+        /* ===== TABLE ===== */
+        .tc { background:#fff; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.03); overflow:hidden; }
+        .tc table { width:100%; border-collapse:collapse; }
+        .tc th { background:#f8fafc; padding:12px 16px; text-align:left; font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; border-bottom:2px solid #e2e8f0; }
+        .tc td { padding:12px 16px; font-size:13px; color:#475569; border-bottom:1px solid #f1f5f9; }
+        .tc tr:hover td { background:#f8fafc; }
+        .tc tr:last-child td { border-bottom:none; }
+
+        /* ===== BADGE ===== */
+        .badge { display:inline-block; padding:3px 10px; border-radius:50px; font-size:11px; font-weight:600; }
+        .bg-gr { background:#dcfce7; color:#166534; }
+        .bg-rd { background:#fee2e2; color:#991b1b; }
+        .bg-bl { background:#dbeafe; color:#1e40af; }
+        .bg-vi { background:#ede9fe; color:#5b21b6; }
+        .bg-am { background:#fef3c7; color:#92400e; }
+        .bg-sl { background:#f1f5f9; color:#475569; }
+
+        /* ===== ACTION BTN ===== */
+        .ab { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:8px; border:none; cursor:pointer; transition:all 0.15s; font-size:13px; text-decoration:none; }
+        .ab-v { color:#2563eb; } .ab-v:hover { background:#eff6ff; }
+        .ab-e { color:#d97706; } .ab-e:hover { background:#fffbeb; }
+        .ab-d { color:#dc2626; } .ab-d:hover { background:#fef2f2; }
+        .ab-c { color:#059669; } .ab-c:hover { background:#ecfdf5; }
+
+        /* ===== GRIDS ===== */
+        .g2,.g3,.g4 { display:grid; grid-template-columns:1fr; gap:16px; }
+        @media(min-width:640px) { .g2{grid-template-columns:1fr 1fr;} .g3{grid-template-columns:1fr 1fr;} .g4{grid-template-columns:1fr 1fr;} }
+        @media(min-width:1024px) { .g3{grid-template-columns:1fr 1fr 1fr;} .g4{grid-template-columns:1fr 1fr 1fr 1fr;} .g2c{grid-template-columns:1fr 1fr;} .g3c{grid-template-columns:1fr 1fr 1fr;} }
+
+        /* ===== HELPERS ===== */
+        .fb { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+        .fg { display:flex; align-items:center; gap:8px; }
+        .fgc { display:flex; align-items:center; gap:8px; justify-content:center; }
+        .tr { text-align:right; } .tct { text-align:center; }
+        .fw7 { font-weight:700; } .fw6 { font-weight:600; }
+        .mt4 { margin-top:16px; } .mb4 { margin-bottom:16px; } .mb6 { margin-bottom:24px; }
+        .ox { overflow-x:auto; }
+        .bl4 { border-left:4px solid; }
+        .ble { border-left-color:#10b981; } .bla { border-left-color:#f59e0b; } .blb { border-left-color:#3b82f6; } .blr { border-left-color:#ef4444; } .blv { border-left-color:#8b5cf6; }
+        .ib { border-radius:12px; display:flex; align-items:center; justify-content:center; }
+        .ib48 { width:48px; height:48px; font-size:20px; } .ib40 { width:40px; height:40px; font-size:16px; }
+        .ib-e { background:#ecfdf5; color:#059669; } .ib-a { background:#fffbeb; color:#d97706; }
+        .ib-b { background:#eff6ff; color:#2563eb; } .ib-r { background:#fef2f2; color:#dc2626; }
+        .ib-v { background:#f5f3ff; color:#7c3aed; } .ib-c { background:#ecfeff; color:#0891b2; }
+        .lbl { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; }
+        .val { font-size:24px; font-weight:800; color:#0f172a; margin-top:4px; }
+        .sub { font-size:12px; margin-top:4px; }
+    </style>
+</head>
+<body>
+
+    <div id="overlay" class="overlay" onclick="toggleSB()"></div>
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sb-logo">
+            <div class="sb-logo-icon"><i class="fas fa-wheat-awn"></i></div>
+            <div><h1>Koperasi Gabah</h1><p>Mandiri Bersama</p></div>
+        </div>
+
+        <nav class="sb-nav">
+            {% url 'dashboard' as u1 %}
+            {% url 'anggota_list' as u2 %}
+            {% url 'iuran_list' as u3 %}
+            {% url 'sp_list' as u4 %}
+            {% url 'penjualan_list' as u5 %}
+            {% url 'harga_list' as u6 %}
+            {% url 'pengeluaran_list' as u7 %}
+            {% url 'rugi_laba' as u8 %}
+            {% url 'cashflow_report' as u9 %}
+
+            <div class="sb-section">Beranda</div>
+            <a href="{{ u1 }}" class="sb-link {% if request.path == u1 %}act{% endif %}"><i class="fas fa-chart-pie"></i>Dashboard</a>
+
+            <div class="sb-section">Data Master</div>
+            <a href="{{ u2 }}" class="sb-link {% if u2 in request.path %}act{% endif %}"><i class="fas fa-users"></i>Data Anggota</a>
+            <a href="{{ u6 }}" class="sb-link {% if u6 in request.path %}act{% endif %}"><i class="fas fa-tags"></i>Harga Gabah</a>
+
+            <div class="sb-section">Transaksi</div>
+            <a href="{{ u3 }}" class="sb-link {% if u3 in request.path %}act{% endif %}"><i class="fas fa-boxes-stacked"></i>Iuran Panen</a>
+            <a href="{{ u4 }}" class="sb-link {% if u4 in request.path %}act{% endif %}"><i class="fas fa-hand-holding-dollar"></i>Simpan Pinjam</a>
+            <a href="{{ u5 }}" class="sb-link {% if u5 in request.path %}act{% endif %}"><i class="fas fa-truck"></i>Penjualan Gabah</a>
+            <a href="{{ u7 }}" class="sb-link {% if u7 in request.path %}act{% endif %}"><i class="fas fa-receipt"></i>Pengeluaran</a>
+
+            <div class="sb-section">Laporan</div>
+            <a href="{{ u8 }}" class="sb-link {% if request.path == u8 %}act{% endif %}"><i class="fas fa-scale-balanced"></i>Rugi Laba</a>
+            <a href="{{ u9 }}" class="sb-link {% if request.path == u9 %}act{% endif %}"><i class="fas fa-money-bill-transfer"></i>Arus Kas (Cashflow)</a>
+        </nav>
+
+        <div class="sb-widget">
+            <div class="sb-widget-card">
+                <div class="sw-label"><div class="sw-icon"><i class="fas fa-tag"></i></div><span>Harga Gabah Terbaru</span></div>
+                <div class="sw-val">Rp {{ harga_terbaru|default:"0"|floatformat:0 }} <small>/100kg</small></div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========== MAIN ========== -->
+    <div class="main-area">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="menu-btn" onclick="toggleSB()"><i class="fas fa-bars"></i></button>
+                <h2>{% block page_title %}Dashboard{% endblock %}</h2>
+            </div>
+            <div class="topbar-right">
+                <div class="user-badge"><div class="av"><i class="fas fa-user"></i></div><span>{{ user.username }}</span></div>
+                <a href="{% url 'logout' %}" class="logout-btn"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></a>
+            </div>
+        </header>
+
+        {% if messages %}
+        <div style="padding:16px 24px 0;">
+            {% for message in messages %}
+            <div class="toast {% if message.tags == 'success' %}t-ok{% elif message.tags == 'error' %}t-er{% elif message.tags == 'warning' %}t-wn{% else %}t-in{% endif %}">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-times-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+                <button class="tx" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+        function toggleSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('on');}
+        setTimeout(function(){document.querySelectorAll('.toast').forEach(function(el){el.style.transition='opacity .4s';el.style.opacity='0';setTimeout(function(){el.remove()},400)})},5000);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

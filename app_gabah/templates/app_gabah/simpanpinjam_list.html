@@ -1,0 +1,128 @@
+{% extends "app_gabah/base.html" %}
+{% block title %}Simpan Pinjam{% endblock %}
+{% block page_title %}Simpan Pinjam{% endblock %}
+{% load humanize %}
+
+{% block content %}
+
+<!-- Toolbar -->
+<div class="fb mb6">
+    <a href="{% url 'sp_create' %}" class="bp"><i class="fas fa-plus"></i> Tambah Transaksi</a>
+    <form method="get" class="fg" style="flex-wrap:wrap;">
+        <select name="tf" class="fi" style="width:140px;">
+            <option value="">Semua Tipe</option>
+            <option value="simpanan" {% if tf == 'simpanan' %}selected{% endif %}>Simpanan</option>
+            <option value="pinjaman" {% if tf == 'pinjaman' %}selected{% endif %}>Pinjaman</option>
+        </select>
+        <select name="sf" class="fi" style="width:130px;">
+            <option value="">Semua Status</option>
+            <option value="aktif" {% if sf == 'aktif' %}selected{% endif %}>Aktif</option>
+            <option value="lunas" {% if sf == 'lunas' %}selected{% endif %}>Lunas</option>
+        </select>
+        <select name="af" class="fi" style="width:170px;">
+            <option value="">Semua Anggota</option>
+            {% for a in anggota_list %}
+            <option value="{{ a.pk }}" {% if af == a.pk|stringformat:"s" %}selected{% endif %}>{{ a.nama }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="bs"><i class="fas fa-filter"></i> Filter</button>
+    </form>
+</div>
+
+<!-- Summary Cards -->
+<div class="g2 mb6">
+    <div class="sc bl4 blv">
+        <div class="fb">
+            <div>
+                <div class="lbl">Total Simpanan</div>
+                <div class="val" style="color:#7c3aed;">Rp {{ ts|floatformat:0|intcomma }}</div>
+            </div>
+            <div class="ib ib48 ib-v"><i class="fas fa-piggy-bank"></i></div>
+        </div>
+    </div>
+    <div class="sc bl4 blr">
+        <div class="fb">
+            <div>
+                <div class="lbl">Total Pinjaman</div>
+                <div class="val" style="color:#dc2626;">Rp {{ tp|floatformat:0|intcomma }}</div>
+            </div>
+            <div class="ib ib48 ib-r"><i class="fas fa-hand-holding-dollar"></i></div>
+        </div>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="tc ox">
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Tanggal</th>
+                <th>Anggota</th>
+                <th>Tipe</th>
+                <th style="text-align:right;">Jumlah (Rp)</th>
+                <th style="text-align:right;">Bunga</th>
+                <th>Jatuh Tempo</th>
+                <th>Status</th>
+                <th style="text-align:center;">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in object_list %}
+            <tr>
+                <td style="color:#94a3b8; font-weight:600;">{{ forloop.counter }}</td>
+                <td style="font-weight:600; color:#1e293b;">{{ obj.tanggal|date:"d M Y" }}</td>
+                <td>
+                    <a href="{% url 'anggota_detail' obj.anggota.pk %}" style="color:#059669; font-weight:600; text-decoration:none;">
+                        {{ obj.anggota.nama }}
+                    </a>
+                </td>
+                <td>
+                    {% if obj.tipe == 'simpanan' %}
+                    <span class="badge bg-vi"><i class="fas fa-arrow-down" style="font-size:9px; margin-right:3px;"></i>Simpanan</span>
+                    {% else %}
+                    <span class="badge bg-rd"><i class="fas fa-arrow-up" style="font-size:9px; margin-right:3px;"></i>Pinjaman</span>
+                    {% endif %}
+                </td>
+                <td style="text-align:right; font-weight:700; {% if obj.tipe == 'simpanan' %}color:#7c3aed{% else %}color:#dc2626{% endif %}; font-size:14px;">
+                    Rp {{ obj.jumlah_rp|floatformat:0|intcomma }}
+                </td>
+                <td style="text-align:right; color:#64748b;">{{ obj.bunga_persen }}%</td>
+                <td>
+                    {% if obj.jatuh_tempo %}
+                        {{ obj.jatuh_tempo|date:"d M Y" }}
+                    {% else %}
+                        <span style="color:#cbd5e1;">-</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if obj.status == 'aktif' %}
+                    <span class="badge bg-bl">Aktif</span>
+                    {% else %}
+                    <span class="badge bg-gr">Lunas</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="fgc">
+                        {% if obj.tipe == 'pinjaman' and obj.status == 'aktif' %}
+                        <a href="{% url 'sp_lunasi' obj.pk %}" class="ab ab-c" title="Lunasi" onclick="return confirm('Lunasi pinjaman ini?')"><i class="fas fa-check"></i></a>
+                        {% endif %}
+                        <a href="{% url 'sp_update' obj.pk %}" class="ab ab-e" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="{% url 'sp_delete' obj.pk %}" class="ab ab-d" title="Hapus"><i class="fas fa-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="text-align:center; padding:48px 16px; color:#94a3b8;">
+                    <div style="margin-bottom:12px;"><i class="fas fa-hand-holding-dollar" style="font-size:36px; color:#e2e8f0;"></i></div>
+                    <div style="font-size:15px; font-weight:600; color:#64748b; margin-bottom:4px;">Belum Ada Data</div>
+                    <div style="font-size:13px;">Klik tombol "Tambah Transaksi" untuk mencatat simpanan atau pinjaman</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

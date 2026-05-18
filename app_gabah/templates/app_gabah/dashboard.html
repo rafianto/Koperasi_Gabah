@@ -1,0 +1,262 @@
+{% extends "app_gabah/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% load humanize %}
+
+{% block content %}
+
+<!-- Year Filter -->
+<div class="fb mb6">
+    <div class="fg" style="flex-wrap:wrap;">
+        <span style="font-size:13px; font-weight:600; color:#64748b;">Tahun:</span>
+        {% for y in years %}
+        <a href="?year={{ y }}" style="padding:6px 14px; border-radius:8px; font-size:13px; font-weight:600; text-decoration:none; transition:all 0.15s;
+           {% if y == year %}background:#059669; color:#fff; box-shadow:0 2px 6px rgba(5,150,105,0.3);
+           {% else %}background:#fff; color:#64748b; border:1px solid #e2e8f0;{% endif %}">{{ y }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ====== MAIN STATS ====== -->
+<div class="g4 mb6">
+
+    <!-- Total Anggota -->
+    <div class="sc bl4 ble">
+        <div class="fb">
+            <div>
+                <div class="lbl">Total Anggota</div>
+                <div class="val">{{ total_anggota }}</div>
+                <div class="sub" style="color:#059669;">{{ anggota_aktif }} aktif</div>
+            </div>
+            <div class="ib ib48 ib-e"><i class="fas fa-users"></i></div>
+        </div>
+    </div>
+
+    <!-- Stok Gabah -->
+    <div class="sc bl4 bla">
+        <div class="fb">
+            <div>
+                <div class="lbl">Stok Gabah</div>
+                <div class="val">{{ stok_gabah_kg|floatformat:0 }} <small style="font-size:14px; font-weight:400; color:#94a3b8;">kg</small></div>
+                <div class="sub" style="color:#d97706;">Iuran: {{ iuran_kg|floatformat:0|intcomma }} kg</div>
+            </div>
+            <div class="ib ib48 ib-a"><i class="fas fa-warehouse"></i></div>
+        </div>
+    </div>
+
+    <!-- Penjualan -->
+    <div class="sc bl4 blb">
+        <div class="fb">
+            <div>
+                <div class="lbl">Penjualan</div>
+                <div class="val">Rp {{ total_penjualan_rp|floatformat:0|intcomma }}</div>
+                <div class="sub" style="color:#2563eb;">{{ penjualan_kg|floatformat:0|intcomma }} kg terjual</div>
+            </div>
+            <div class="ib ib48 ib-b"><i class="fas fa-truck"></i></div>
+        </div>
+    </div>
+
+    <!-- Laba Rugi -->
+    <div class="sc bl4 {% if laba_rugi >= 0 %}ble{% else %}blr{% endif %}">
+        <div class="fb">
+            <div>
+                <div class="lbl">Laba / Rugi</div>
+                <div class="val" style="{% if laba_rugi >= 0 %}color:#059669{% else %}color:#dc2626{% endif %}">
+                    {% if laba_rugi >= 0 %}+{% endif %}Rp {{ laba_rugi|floatformat:0|intcomma }}
+                </div>
+                <div class="sub" style="color:#94a3b8;">Tahun {{ year }}</div>
+            </div>
+            <div class="ib ib48 {% if laba_rugi >= 0 %}ib-e{% else %}ib-r{% endif %}">
+                <i class="fas {% if laba_rugi >= 0 %}fa-arrow-trend-up{% else %}fa-arrow-trend-down{% endif %}"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== SECOND ROW ====== -->
+<div class="g3 mb6">
+    <div class="sc">
+        <div class="fg">
+            <div class="ib ib40 ib-v"><i class="fas fa-piggy-bank"></i></div>
+            <div>
+                <div class="lbl">Total Simpanan</div>
+                <div style="font-size:18px; font-weight:700; color:#0f172a; margin-top:2px;">Rp {{ total_simpanan|floatformat:0|intcomma }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="sc">
+        <div class="fg">
+            <div class="ib ib40 ib-r"><i class="fas fa-hand-holding-dollar"></i></div>
+            <div>
+                <div class="lbl">Total Pinjaman Aktif</div>
+                <div style="font-size:18px; font-weight:700; color:#0f172a; margin-top:2px;">Rp {{ total_pinjaman|floatformat:0|intcomma }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="sc">
+        <div class="fg">
+            <div class="ib ib40 ib-c"><i class="fas fa-tag"></i></div>
+            <div>
+                <div class="lbl">Harga Gabah / 100kg</div>
+                <div style="font-size:18px; font-weight:700; color:#0f172a; margin-top:2px;">Rp {{ harga_terbaru|floatformat:0|intcomma }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== CHARTS ====== -->
+<div style="display:grid; grid-template-columns:1fr; gap:20px;" class="mb6 chart-grid">
+    <div class="sc">
+        <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+            <i class="fas fa-chart-bar" style="color:#059669; margin-right:8px;"></i>Pendapatan vs Beban Bulanan
+        </h3>
+        <canvas id="chartKeuangan" height="280"></canvas>
+    </div>
+    <div class="sc">
+        <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+            <i class="fas fa-boxes-stacked" style="color:#d97706; margin-right:8px;"></i>Iuran vs Penjualan Gabah (kg)
+        </h3>
+        <canvas id="chartGabah" height="280"></canvas>
+    </div>
+</div>
+
+<!-- ====== PERFORMANCE & RECENT ====== -->
+<div style="display:grid; grid-template-columns:1fr; gap:20px;" class="perf-grid">
+
+    <!-- Performance -->
+    <div class="sc">
+        <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+            <i class="fas fa-gauge-high" style="color:#059669; margin-right:8px;"></i>Performa
+        </h3>
+        <div style="display:flex; flex-direction:column; gap:16px;">
+
+            <!-- Efisiensi Penjualan -->
+            <div>
+                <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+                    <span style="color:#64748b;">Efisiensi Penjualan</span>
+                    <span style="font-weight:600; {% if efisiensi_penjualan > 70 %}color:#059669{% else %}color:#d97706{% endif %};">{{ efisiensi_penjualan|floatformat:1 }}%</span>
+                </div>
+                <div style="width:100%; background:#e2e8f0; border-radius:50px; height:8px; overflow:hidden;">
+                    <div style="height:8px; border-radius:50px; background:{% if efisiensi_penjualan > 70 %}#10b981{% else %}#f59e0b{% endif %}; width:{{ efisiensi_penjualan|floatformat:0 }}%; transition:width 0.6s ease; min-width:2%;"></div>
+                </div>
+                <div style="font-size:11px; color:#94a3b8; margin-top:4px;">Penjualan / Iuran</div>
+            </div>
+
+            <!-- Rasio Pinjaman/Simpanan -->
+            <div>
+                <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+                    <span style="color:#64748b;">Rasio Pinjaman/Simpanan</span>
+                    <span style="font-weight:600; {% if rasio_pinjaman_simpanan < 80 %}color:#059669{% else %}color:#dc2626{% endif %};">{{ rasio_pinjaman_simpanan|floatformat:1 }}%</span>
+                </div>
+                <div style="width:100%; background:#e2e8f0; border-radius:50px; height:8px; overflow:hidden;">
+                    <div style="height:8px; border-radius:50px; background:{% if rasio_pinjaman_simpanan < 80 %}#10b981{% else %}#ef4444{% endif %}; width:{{ rasio_pinjaman_simpanan|floatformat:0 }}%; transition:width 0.6s ease; min-width:2%;"></div>
+                </div>
+            </div>
+
+            <!-- Rata-rata Iuran -->
+            <div style="display:flex; justify-content:space-between; font-size:13px; padding-top:12px; border-top:1px solid #f1f5f9;">
+                <span style="color:#64748b;">Rata-rata Iuran/Anggota</span>
+                <span style="font-weight:600; color:#0f172a;">{{ rata_iuran_per_anggota|floatformat:1 }} kg</span>
+            </div>
+
+            <!-- Pendapatan per kg -->
+            <div style="display:flex; justify-content:space-between; font-size:13px;">
+                <span style="color:#64748b;">Pendapatan / kg</span>
+                <span style="font-weight:600; color:#0f172a;">Rp {{ pendapatan_per_kg|floatformat:0|intcomma }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Iuran Terbaru -->
+    <div class="sc">
+        <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+            <i class="fas fa-boxes-stacked" style="color:#d97706; margin-right:8px;"></i>Iuran Terbaru
+        </h3>
+        {% if iuran_terbaru %}
+            {% for iuran in iuran_terbaru %}
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f8fafc;">
+                <div>
+                    <div style="font-size:13px; font-weight:600; color:#1e293b;">{{ iuran.anggota.nama }}</div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:2px;">{{ iuran.tanggal|date:"d M Y" }} &middot; {{ iuran.periode }}</div>
+                </div>
+                <div style="font-size:13px; font-weight:700; color:#d97706;">{{ iuran.jumlah_kg|floatformat:1 }} kg</div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div style="text-align:center; padding:32px 16px; color:#94a3b8;">
+            <i class="fas fa-inbox" style="font-size:28px; color:#e2e8f0; margin-bottom:8px; display:block;"></i>
+            <span style="font-size:13px;">Belum ada data iuran</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Penjualan Terbaru -->
+    <div class="sc">
+        <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+            <i class="fas fa-truck" style="color:#2563eb; margin-right:8px;"></i>Penjualan Terbaru
+        </h3>
+        {% if penjualan_terbaru %}
+            {% for penj in penjualan_terbaru %}
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f8fafc;">
+                <div>
+                    <div style="font-size:13px; font-weight:600; color:#1e293b;">{{ penj.pembeli }}</div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:2px;">{{ penj.tanggal|date:"d M Y" }}</div>
+                </div>
+                <div style="font-size:13px; font-weight:700; color:#2563eb;">Rp {{ penj.total_rp|floatformat:0|intcomma }}</div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div style="text-align:center; padding:32px 16px; color:#94a3b8;">
+            <i class="fas fa-inbox" style="font-size:28px; color:#e2e8f0; margin-bottom:8px; display:block;"></i>
+            <span style="font-size:13px;">Belum ada data penjualan</span>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Responsive Grids -->
+<style>
+    @media(min-width:1024px) {
+        .chart-grid { grid-template-columns: 1fr 1fr !important; }
+        .perf-grid { grid-template-columns: 1fr 1fr 1fr !important; }
+    }
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    new Chart(document.getElementById('chartKeuangan'), {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [
+                { label: 'Penjualan (Rp)', data: {{ chart_penjualan|safe }}, backgroundColor: 'rgba(5,150,105,0.7)', borderRadius: 6 },
+                { label: 'Pengeluaran (Rp)', data: {{ chart_pengeluaran|safe }}, backgroundColor: 'rgba(239,68,68,0.7)', borderRadius: 6 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } } },
+            scales: { y: { beginAtZero: true, ticks: { font: { family: 'Inter', size: 11 } } }, x: { ticks: { font: { family: 'Inter', size: 11 } } } }
+        }
+    });
+
+    new Chart(document.getElementById('chartGabah'), {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [
+                { label: 'Iuran (kg)', data: {{ chart_iuran_kg|safe }}, backgroundColor: 'rgba(245,158,11,0.7)', borderRadius: 6 },
+                { label: 'Penjualan (kg)', data: {{ chart_penjualan_kg|safe }}, backgroundColor: 'rgba(59,130,246,0.7)', borderRadius: 6 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } } },
+            scales: { y: { beginAtZero: true, ticks: { font: { family: 'Inter', size: 11 } } }, x: { ticks: { font: { family: 'Inter', size: 11 } } } }
+        }
+    });
+</script>
+{% endblock %}

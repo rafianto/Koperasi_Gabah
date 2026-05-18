@@ -1,0 +1,46 @@
+{% extends "app_gabah/base.html" %}
+{% block title %}Hapus Penjualan{% endblock %}
+{% block page_title %}Konfirmasi Hapus{% endblock %}
+
+{% block content %}
+<div style="max-width:500px; margin:0 auto; background:#fff; padding:32px; border-radius:8px; border:2px solid #fecaca; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+    
+    <div style="margin-bottom:20px;">
+        <i class="fas fa-exclamation-triangle" style="font-size:48px; color:#dc2626;"></i>
+    </div>
+    
+    <h3 style="color:#1e293b; margin-bottom:8px;">Apakah Anda yakin?</h3>
+    <p style="color:#64748b; margin-bottom:24px; font-size:15px;">
+        Data penjualan gabah berikut akan dihapus permanen:
+    </p>
+
+    <div style="background:#f8fafc; padding:16px; border-radius:6px; text-align:left; margin-bottom:24px; border:1px solid #e2e8f0;">
+        <table style="width:100%; font-size:14px;">
+            <tr>
+                <td style="color:#64748b; padding:4px 0; width:120px;">Tanggal</td>
+                <td style="font-weight:600; color:#1e293b;">{{ object.tanggal|date:"d M Y" }}</td>
+            </tr>
+            <tr>
+                <td style="color:#64748b; padding:4px 0;">Pembeli</td>
+                <td style="font-weight:600; color:#1e293b;">{{ object.pembeli }}</td>
+            </tr>
+            <tr>
+                <td style="color:#64748b; padding:4px 0;">Jumlah</td>
+                <td style="font-weight:600; color:#1e293b;">{{ object.jumlah_kg|floatformat:1 }} Kg</td>
+            </tr>
+            <tr>
+                <td style="color:#64748b; padding:4px 0;">Total Harga</td>
+                <td style="font-weight:800; color:#dc2626; font-size:16px;">Rp {{ object.total_harga|floatformat:0 }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <form method="post" class="fg" style="justify-content:center; gap:10px;">
+        {% csrf_token %}
+        <button type="submit" class="bp" style="background:#dc2626;"><i class="fas fa-trash"></i> Ya, Hapus</button>
+        <a href="{% url 'penjualan_list' %}" style="padding:8px 16px; background:#e2e8f0; color:#334155; border-radius:6px; text-decoration:none; font-weight:600; font-size:14px;">
+            <i class="fas fa-arrow-left"></i> Batal
+        </a>
+    </form>
+</div>
+{% endblock %}

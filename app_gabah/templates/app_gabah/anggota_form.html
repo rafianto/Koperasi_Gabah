@@ -1,0 +1,53 @@
+{% extends "app_gabah/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:640px;">
+    <div class="sc">
+
+        <!-- Form Header -->
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid #f1f5f9;">
+            <div class="ib ib40 ib-e"><i class="fas fa-user-plus"></i></div>
+            <div>
+                <h3 style="font-size:17px; font-weight:700; color:#0f172a;">{{ title }}</h3>
+                <p style="font-size:12px; color:#94a3b8;">Lengkapi data di bawah ini</p>
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display:flex; flex-direction:column; gap:18px;">
+
+                {% for field in form %}
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600; color:#475569; margin-bottom:6px;" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                        {% if field.field.required %}<span style="color:#dc2626;"> *</span>{% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div style="margin-top:6px; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+                        {% for err in field.errors %}
+                        <span style="font-size:12px; color:#dc2626;"><i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>{{ err }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex; gap:10px; margin-top:28px; padding-top:20px; border-top:1px solid #f1f5f9;">
+                <button type="submit" class="bp" style="flex:1; justify-content:center;">
+                    <i class="fas fa-save"></i> Simpan Data
+                </button>
+                <a href="{% url 'anggota_list' %}" class="bs" style="justify-content:center;">
+                    <i class="fas fa-times"></i> Batal
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
