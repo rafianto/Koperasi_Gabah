@@ -24,4 +24,9 @@ jika total stok gabah tidak cukup di gudang :
 
 <img width="896" height="578" alt="image" src="https://github.com/user-attachments/assets/6ee48d26-7386-4fd6-a8b8-a4d1ecfab9e4" />
 
+tambahan add folder laporan arus kas realtime 
+
+<img width="1831" height="759" alt="image" src="https://github.com/user-attachments/assets/ad6c0292-5b6f-437f-aa42-acd049cd8782" />
+
+
 
