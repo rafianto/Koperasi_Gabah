@@ -14,4 +14,5 @@ system pengelolaan koperasi Gabah
 
 <img width="1834" height="775" alt="image" src="https://github.com/user-attachments/assets/759330d9-89e3-4dd2-8569-e679c76284e5" />
 
+<img width="1851" height="858" alt="image" src="https://github.com/user-attachments/assets/ed6159f0-7a87-4942-a539-494a478de3b8" />
 
