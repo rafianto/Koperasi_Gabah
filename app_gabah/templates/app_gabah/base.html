@@ -1,4 +1,6 @@
 {% load static %}
+{% load humanize %}
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -198,7 +200,7 @@
         <div class="sb-widget">
             <div class="sb-widget-card">
                 <div class="sw-label"><div class="sw-icon"><i class="fas fa-tag"></i></div><span>Harga Gabah Terbaru</span></div>
-                <div class="sw-val">Rp {{ harga_terbaru|default:"0"|floatformat:0 }} <small>/100kg</small></div>
+                <div class="sw-val">Rp {{ harga_terbaru|default:"0"|floatformat:0|intcomma }} <small>/100kg</small></div>
             </div>
         </div>
     </aside>
