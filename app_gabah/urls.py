@@ -1,6 +1,11 @@
 from django.urls import path
 from . import views
 
+def anggota_pdf_view(request, pk):
+    """Lazy import: hanya load views_pdf saat URL diakses."""
+    from .views_pdf import anggota_pdf
+    return anggota_pdf(request, pk)
+
 urlpatterns = [
     # Auth
     path('', views.dashboard, name='dashboard'),
@@ -17,6 +22,7 @@ urlpatterns = [
     path('anggota/<int:pk>/edit/', views.anggota_update, name='anggota_update'),
     path('anggota/<int:pk>/', views.anggota_detail, name='anggota_detail'),
     path('anggota/<int:pk>/hapus/', views.anggota_delete, name='anggota_delete'),
+    path('anggota/<int:pk>/pdf/', anggota_pdf_view, name='anggota_pdf'),
 
     # Iuran Panen
     path('iuran/', views.iuran_list, name='iuran_list'),
