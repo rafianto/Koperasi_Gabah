@@ -65,7 +65,12 @@
             <a href="{% url 'anggota_update' anggota.pk %}" class="bp" style="flex:1; justify-content:center; text-align:center;">
                 <i class="fas fa-edit"></i> Edit
             </a>
-            <a href="{% url 'anggota_list' %}" class="bs" style="flex:1; justify-content:center; text-align:center;">
+            <a href="{% url 'anggota_pdf' anggota.pk %}" target="_blank" class="bp" style="flex:1; justify-content:center; text-align:center; background:#7c3aed;">
+                <i class="fas fa-file-pdf"></i> PDF
+            </a>
+        </div>
+        <div style="margin-top:10px;">
+            <a href="{% url 'anggota_list' %}" class="bs" style="display:flex; justify-content:center; text-align:center; width:100%;">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>
         </div>
@@ -168,19 +173,16 @@
 </div>
 
 <style>
-    /* Layout 30% Kiri dan 70% Kanan untuk Layar Desktop */
     @media(min-width:1024px) {
         .detail-grid-3070 { 
-            grid-template-columns: 3fr 7fr !important; /* 3fr = 30%, 7fr = 70% secara proporsional */
+            grid-template-columns: 3fr 7fr !important;
         }
     }
-    /* Jika layar tablet/mobile, kembalikan ke 1 kolom (tumpuk atas-bawah) */
     @media(max-width:1023px) {
         .detail-grid-3070 { 
             grid-template-columns: 1fr !important; 
         }
     }
-    /* Responsive untuk kartu Simpanan & Pinjaman di dalam kolom kanan */
     @media(max-width:640px) {
         .sp-grid-right { 
             grid-template-columns: 1fr !important; 
