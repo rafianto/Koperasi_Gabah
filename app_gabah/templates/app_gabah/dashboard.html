@@ -106,18 +106,38 @@
 
 <!-- ====== CHARTS ====== -->
 <div style="display:grid; grid-template-columns:1fr; gap:20px;" class="mb6 chart-grid">
+
+    <!-- ===== CHART BAR: Pendapatan vs Beban ===== -->
     <div class="sc">
         <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
             <i class="fas fa-chart-bar" style="color:#059669; margin-right:8px;"></i>Pendapatan vs Beban Bulanan
         </h3>
         <canvas id="chartKeuangan" height="280"></canvas>
     </div>
+
+    <!-- ===== CHART BAR: Iuran vs Penjualan ===== -->
     <div class="sc">
         <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
             <i class="fas fa-boxes-stacked" style="color:#d97706; margin-right:8px;"></i>Iuran vs Penjualan Gabah (kg)
         </h3>
         <canvas id="chartGabah" height="280"></canvas>
     </div>
+
+    <!-- ===== CHART LINE: Pergerakan Harga Gabah ===== -->
+    <div class="sc">
+        <h3 style="font-size:14px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+            <i class="fas fa-chart-line" style="color:#8b5cf6; margin-right:8px;"></i>Pergerakan Harga Gabah / 100 kg — Tahun {{ year }}
+        </h3>
+        {% if chart_harga_data %}
+        <canvas id="chartHarga" height="280"></canvas>
+        {% else %}
+        <div style="text-align:center; padding:40px 16px; color:#94a3b8;">
+            <i class="fas fa-chart-line" style="font-size:32px; color:#e2e8f0; margin-bottom:8px; display:block;"></i>
+            <span style="font-size:13px;">Belum ada data harga gabah untuk tahun {{ year }}</span>
+        </div>
+        {% endif %}
+    </div>
+
 </div>
 
 <!-- ====== PERFORMANCE & RECENT ====== -->
@@ -227,36 +247,161 @@
 
 {% block extra_js %}
 <script>
+    // ===== Chart 1: Pendapatan vs Beban Bulanan =====
     new Chart(document.getElementById('chartKeuangan'), {
         type: 'bar',
         data: {
             labels: {{ chart_labels|safe }},
             datasets: [
-                { label: 'Penjualan (Rp)', data: {{ chart_penjualan|safe }}, backgroundColor: 'rgba(5,150,105,0.7)', borderRadius: 6 },
-                { label: 'Pengeluaran (Rp)', data: {{ chart_pengeluaran|safe }}, backgroundColor: 'rgba(239,68,68,0.7)', borderRadius: 6 }
+                {
+                    label: 'Penjualan (Rp)',
+                    data: {{ chart_penjualan|safe }},
+                    backgroundColor: 'rgba(5,150,105,0.7)',
+                    borderRadius: 6
+                },
+                {
+                    label: 'Pengeluaran (Rp)',
+                    data: {{ chart_pengeluaran|safe }},
+                    backgroundColor: 'rgba(239,68,68,0.7)',
+                    borderRadius: 6
+                }
             ]
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } } },
-            scales: { y: { beginAtZero: true, ticks: { font: { family: 'Inter', size: 11 } } }, x: { ticks: { font: { family: 'Inter', size: 11 } } } }
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { font: { family: 'Inter', size: 11 } } },
+                x: { ticks: { font: { family: 'Inter', size: 11 } } }
+            }
         }
     });
 
+    // ===== Chart 2: Iuran vs Penjualan Gabah (kg) =====
     new Chart(document.getElementById('chartGabah'), {
         type: 'bar',
         data: {
             labels: {{ chart_labels|safe }},
             datasets: [
-                { label: 'Iuran (kg)', data: {{ chart_iuran_kg|safe }}, backgroundColor: 'rgba(245,158,11,0.7)', borderRadius: 6 },
-                { label: 'Penjualan (kg)', data: {{ chart_penjualan_kg|safe }}, backgroundColor: 'rgba(59,130,246,0.7)', borderRadius: 6 }
+                {
+                    label: 'Iuran (kg)',
+                    data: {{ chart_iuran_kg|safe }},
+                    backgroundColor: 'rgba(245,158,11,0.7)',
+                    borderRadius: 6
+                },
+                {
+                    label: 'Penjualan (kg)',
+                    data: {{ chart_penjualan_kg|safe }},
+                    backgroundColor: 'rgba(59,130,246,0.7)',
+                    borderRadius: 6
+                }
             ]
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } } },
-            scales: { y: { beginAtZero: true, ticks: { font: { family: 'Inter', size: 11 } } }, x: { ticks: { font: { family: 'Inter', size: 11 } } } }
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { font: { family: 'Inter', size: 11 } } },
+                x: { ticks: { font: { family: 'Inter', size: 11 } } }
+            }
         }
     });
+
+    // ===== Chart 3: Pergerakan Harga Gabah (Line Chart) =====
+    {% if chart_harga_data %}
+    (function() {
+        var ctx = document.getElementById('chartHarga').getContext('2d');
+
+        // Gradient fill di bawah garis
+        var gradient = ctx.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, 'rgba(139,92,246,0.25)');
+        gradient.addColorStop(1, 'rgba(139,92,246,0.02)');
+
+        var hargaData = {{ chart_harga_data|safe }};
+        var hargaLabels = {{ chart_harga_labels|safe }};
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: hargaLabels,
+                datasets: [{
+                    label: 'Harga / 100 kg (Rp)',
+                    data: hargaData,
+                    borderColor: '#8b5cf6',
+                    backgroundColor: gradient,
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#8b5cf6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointHoverBackgroundColor: '#7c3aed',
+                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderWidth: 3,
+                    fill: true,
+                    tension: 0.35
+                }]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: 'Inter', size: 12 },
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15,23,42,0.9)',
+                        titleFont: { family: 'Inter', size: 13, weight: '600' },
+                        bodyFont: { family: 'Inter', size: 12 },
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                var val = context.parsed.y;
+                                return 'Rp ' + val.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            font: { family: 'Inter', size: 11 },
+                            callback: function(value) {
+                                return 'Rp ' + value.toLocaleString('id-ID');
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.04)',
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: { family: 'Inter', size: 11 }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    })();
+    {% endif %}
 </script>
 {% endblock %}
