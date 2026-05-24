@@ -28,5 +28,9 @@ tambahan add folder laporan arus kas realtime
 
 <img width="1831" height="759" alt="image" src="https://github.com/user-attachments/assets/ad6c0292-5b6f-437f-aa42-acd049cd8782" />
 
+dashboard harga gabah realtime
+<img width="1048" height="887" alt="image" src="https://github.com/user-attachments/assets/9585cca3-0308-4a53-9170-01824a7b13ca" />
+
+
 
 
