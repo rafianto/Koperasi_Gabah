@@ -22,6 +22,10 @@ from datetime import datetime     # <--- PASTIKAN INI ADA
 from .utils import CashflowReport # <--- PASTIKAN INI ADA
 from .models import BukuKas       # <--- JIKA LUPA, TAMBAHKAN JUGA MODEL INI
 
+from django.db.models.functions import TruncMonth
+from django.db.models import Min
+from .models import HargaGabah
+
 # ===================== AUTH =====================
 
 def login_view(request):
@@ -167,6 +171,44 @@ def dashboard(request):
         'year': year,
         'years': years,
     }
+
+    # ===== DATA CHART HARGA GABAH =====
+    # Ambil harga gabah per bulan dalam tahun berjalan
+    harga_per_bulan = (
+        HargaGabah.objects
+        .filter(tanggal__year=year)
+        .annotate(bulan=TruncMonth('tanggal'))
+        .values('bulan')
+        .annotate(harga=Min('harga_per_100kg'))  # ambil harga terakhir tiap bulan
+        .order_by('bulan')
+    )
+
+    # Label bulan & data harga
+    BULAN_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des']
+    chart_harga_labels = []
+    chart_harga_data = []
+
+    # Mapping bulan -> harga
+    harga_map = {}
+    for item in harga_per_bulan:
+        month_num = item['bulan'].month
+        harga_map[month_num] = float(item['harga'])
+
+    # Isi semua 12 bulan; jika tidak ada data, gunakan None (chart akan skip titik kosong)
+    for m in range(1, 13):
+        chart_harga_labels.append(BULAN_LABELS[m - 1])
+        chart_harga_data.append(harga_map.get(m, None))
+
+    # Jika seluruhnya None, kirim list kosong agar template tampilkan empty state
+    chart_harga_exists = any(v is not None for v in chart_harga_data)
+    if not chart_harga_exists:
+        chart_harga_data = []
+
+    context.update({
+        'chart_harga_labels': json.dumps(chart_harga_labels),
+        'chart_harga_data': json.dumps(chart_harga_data),
+    })
+
     return render(request, 'app_gabah/dashboard.html', context)
 
 
